@@ -10,7 +10,7 @@
 #pragma once
 #include <array>
 #include <vector>
-
+#include <exception>
 #include "db/flush_scheduler.h"
 #include "db/kv_checksum.h"
 #include "db/trim_history_scheduler.h"
@@ -263,7 +263,7 @@ class LocalSavePoint {
   }
 
 #ifndef NDEBUG
-  ~LocalSavePoint() { assert(committed_); }
+  ~LocalSavePoint() { if (!std::uncaught_exceptions()) assert(committed_); }
 #endif
   Status commit() {
 #ifndef NDEBUG
