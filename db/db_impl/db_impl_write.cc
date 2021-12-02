@@ -1651,7 +1651,7 @@ Status DBImpl::TrimMemtableHistory(WriteContext* context) {
   for (auto& cfd : cfds) {
     autovector<MemTable*> to_delete;
     bool trimmed = cfd->imm()->TrimHistory(
-        &to_delete, cfd->mem()->ApproximateMemoryUsage());
+        &to_delete, cfd->mem()->MemoryAllocatedBytes());
     if (!to_delete.empty()) {
       for (auto m : to_delete) {
         delete m;

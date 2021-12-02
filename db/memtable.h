@@ -146,6 +146,13 @@ class MemTable {
     return approximate_memory_usage_.load(std::memory_order_relaxed);
   }
 
+  // used by MemTableListVersion::MemoryAllocatedBytesExcludingLast
+  size_t MemoryAllocatedBytes() const {
+    return table_->ApproximateMemoryUsage() + 
+           range_del_table_->ApproximateMemoryUsage() + 
+           arena_.MemoryAllocatedBytes();
+  }
+
   // This method heuristically determines if the memtable should continue to
   // host more data.
   bool ShouldScheduleFlush() const {
