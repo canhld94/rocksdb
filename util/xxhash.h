@@ -2058,17 +2058,34 @@ static int XXH_isLittleEndian(void)
 #endif
 
 
-#if defined(__STDC_VERSION__) && (__STDC_VERSION__ > 201710L)
-/* C23 and future versions have standard "unreachable()" */
-#  include <stddef.h>
-#  define XXH_UNREACHABLE() unreachable()
+/*
+ * C23 and future versions have standard "unreachable()".
+ * Once it has been implemented reliably we can add it as an
+ * additional case:
+ *
+ * ```
+ * #if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= XXH_C23_VN)
+ * #  include <stddef.h>
+ * #  ifdef unreachable
+ * #    define XXH_UNREACHABLE() unreachable()
+ * #  endif
+ * #endif
+ * ```
+ *
+ * Note C++23 also has std::unreachable() which can be detected
+ * as follows:
+ * ```
+ * #if defined(__cpp_lib_unreachable) && (__cpp_lib_unreachable >= 202202L)
+ * #  include <utility>
+ * #  define XXH_UNREACHABLE() std::unreachable()
+ * #endif
+ * ```
+ * NB: `__cpp_lib_unreachable` is defined in the `<version>` header.
+ * We don't use that as including `<utility>` in `extern "C"` blocks
+ * doesn't work on GCC12 and Clang 16.
+ */
 
-#elif defined(__cplusplus) && (__cplusplus > 202002L)
-/* C++23 and future versions have std::unreachable() */
-#  include <utility> /* std::unreachable() */
-#  define XXH_UNREACHABLE() std::unreachable()
-
-#elif XXH_HAS_BUILTIN(__builtin_unreachable)
+#if XXH_HAS_BUILTIN(__builtin_unreachable)
 #  define XXH_UNREACHABLE() __builtin_unreachable()
 
 #elif defined(_MSC_VER)
